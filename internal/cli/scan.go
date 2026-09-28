@@ -76,6 +76,7 @@ func writeScanText(
 	)
 	fmt.Fprintf(out, "Files:       %d\n", result.FileCount)
 	fmt.Fprintf(out, "Directories: %d\n", result.DirCount)
+	fmt.Fprintf(out, "Skipped:     %d\n", result.SkippedCount)
 	fmt.Fprintf(
 		out,
 		"Duration:    %s\n",
