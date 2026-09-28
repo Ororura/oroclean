@@ -37,13 +37,30 @@ func (s *FilesystemScanner) Scan(
 
 	err = filepath.WalkDir(
 		absoluteTarget,
-		func(path string, entry fs.DirEntry, walkErr error) error {
+		func(
+			path string,
+			entry fs.DirEntry,
+			walkErr error,
+		) error {
 			if err := ctx.Err(); err != nil {
 				return err
 			}
 
 			if walkErr != nil {
-				return walkErr
+				if path == absoluteTarget {
+					return walkErr
+				}
+
+				result.SkippedCount++
+				result.Issues = append(
+					result.Issues,
+					model.ScanIssue{
+						Path:  path,
+						Error: walkErr.Error(),
+					},
+				)
+
+				return nil
 			}
 
 			if entry.Type()&fs.ModeSymlink != 0 {
@@ -57,11 +74,16 @@ func (s *FilesystemScanner) Scan(
 
 			info, err := entry.Info()
 			if err != nil {
-				return fmt.Errorf(
-					"read file info for %q: %w",
-					path,
-					err,
+				result.SkippedCount++
+				result.Issues = append(
+					result.Issues,
+					model.ScanIssue{
+						Path:  path,
+						Error: err.Error(),
+					},
 				)
+
+				return nil
 			}
 
 			if !info.Mode().IsRegular() {
