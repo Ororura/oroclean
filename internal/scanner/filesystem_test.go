@@ -75,3 +75,44 @@ func TestFilesystemScanner(t *testing.T) {
 		)
 	}
 }
+
+func TestFilesystemScannerDoesNotFollowSymlinks(t *testing.T) {
+	root := t.TempDir()
+	external := t.TempDir()
+
+	externalFile := filepath.Join(external, "large.txt")
+	if err := os.WriteFile(
+		externalFile,
+		[]byte("this file must not be counted"),
+		0o600,
+	); err != nil {
+		t.Fatalf("write external file: %v", err)
+	}
+
+	link := filepath.Join(root, "external")
+
+	if err := os.Symlink(external, link); err != nil {
+		t.Fatalf("create symlink: %v", err)
+	}
+
+	scanner := NewFilesystemScanner()
+
+	result, err := scanner.Scan(context.Background(), root)
+	if err != nil {
+		t.Fatalf("scan directory: %v", err)
+	}
+
+	if result.FileCount != 0 {
+		t.Fatalf(
+			"FileCount = %d, want 0",
+			result.FileCount,
+		)
+	}
+
+	if result.TotalSize != 0 {
+		t.Fatalf(
+			"TotalSize = %d, want 0",
+			result.TotalSize,
+		)
+	}
+}
