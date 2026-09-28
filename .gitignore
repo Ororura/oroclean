@@ -1,0 +1,13 @@
+# Build
+/bin/
+oroclean
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Go
+coverage.out
