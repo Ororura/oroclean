@@ -1,6 +1,10 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"context"
+
+	"github.com/spf13/cobra"
+)
 
 func NewRootCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -18,5 +22,9 @@ func NewRootCommand() *cobra.Command {
 }
 
 func Execute() error {
-	return NewRootCommand().Execute()
+	return ExecuteContext(context.Background())
+}
+
+func ExecuteContext(ctx context.Context) error {
+	return NewRootCommand().ExecuteContext(ctx)
 }
